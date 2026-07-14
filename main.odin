@@ -50,7 +50,7 @@ square_offset :: proc(s: Square, offset: f32) -> Square {
 
 draw_cell :: proc(s: Square) {
 	border_thickness :: 5.0
-	border_color :: rl.Color{0, 0, 255, 0}
+	border_color :: rl.Color{0, 0, 255, 255}
 	rl.DrawRectangleLinesEx(square_to_rec(s), border_thickness, border_color)
 }
 
@@ -73,8 +73,7 @@ main :: proc() {
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
-		defer { rl.EndDrawing() }
-
+		defer rl.EndDrawing()
 		rl.ClearBackground({160, 200, 255, 255})
 
 		for row in 0..<30 {
