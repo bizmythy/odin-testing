@@ -1,0 +1,6 @@
+# direnv
+.direnv
+
+# Odin build artifacts
+game
+*.o
