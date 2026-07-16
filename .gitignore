@@ -2,5 +2,5 @@
 .direnv
 
 # Odin build artifacts
-game
+/game
 *.o
