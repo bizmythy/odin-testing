@@ -1,4 +1,5 @@
 {
+  pkgs,
   ...
 }:
 {
@@ -21,6 +22,18 @@
 
   settings = {
     excludes = [ ];
-    formatter = { };
+    formatter.odinfmt.command = pkgs.writeShellApplication {
+      name = "odinfmt-treefmt";
+      runtimeInputs = [ pkgs.ols ];
+      text = ''
+        # odinfmt only accepts one file, while treefmt batches its arguments.
+        if [[ "''${1-}" == "-w" ]]; then
+          shift
+        fi
+        for file in "$@"; do
+          odinfmt -w "$file"
+        done
+      '';
+    };
   };
 }
