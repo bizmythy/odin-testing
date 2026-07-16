@@ -1,6 +1,6 @@
 package game
 
-// import "core:math/rand"
+import "core:math/rand"
 
 CellState :: enum u8 {
 	Wall,
@@ -17,6 +17,10 @@ Cell :: struct {
 Board :: struct {
 	cells: [][]Cell, // Cells, by row then column.
 	size:  u32, // Size of board.
+}
+
+get_cell :: proc(b: Board, p: Position) -> Cell {
+	return b.cells[p[0]][p[1]]
 }
 
 new_board :: proc(size: u32) -> Board {
@@ -39,6 +43,17 @@ new_board :: proc(size: u32) -> Board {
 	return Board{cells = rows, size = size}
 }
 
-get_cell :: proc(b: Board, p: Position) -> Cell {
-	return b.cells[p[0]][p[1]]
+new_board_randomized :: proc(size: u32) -> Board {
+	board := new_board(size)
+
+	for &row in board.cells {
+		for &cell in row {
+			// randomized cell state
+			cell.state = rand.choice_enum(CellState)
+			// random toggle between true and false
+			cell.solution_filled = (rand.uint32_max(2) != 0)
+		}
+	}
+
+	return board
 }

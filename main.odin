@@ -14,7 +14,7 @@ main :: proc() {
 
 	rl.InitWindow(1280, 720, "nonogramination")
 
-	board := new_board(15)
+	board := new_board_randomized(15)
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
