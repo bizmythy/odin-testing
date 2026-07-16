@@ -6,6 +6,7 @@
 
   programs = {
     nixfmt.enable = true;
+    odinfmt.enable = true;
     jsonfmt.enable = true;
     shellcheck.enable = true;
     gofmt.enable = true;
