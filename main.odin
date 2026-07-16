@@ -3,7 +3,7 @@ package game
 import rl "vendor:raylib"
 
 // Location on grid, row then column.
-Position :: [2]int
+Position :: [2]u32
 
 // 2D vector.
 Vec2 :: rl.Vector2
@@ -22,6 +22,7 @@ Cell :: struct {
 
 Board :: struct {
 	cells: [][]Cell, // Cells, by row then column.
+	size: u32 // Size of board.
 }
 
 new_board :: proc(size: u32) -> Board {
@@ -30,10 +31,25 @@ new_board :: proc(size: u32) -> Board {
 		panic("failed to alloc board")
 	}
 
-	loc : u32 = 0
-	for row in 0..<size {
-		
+	rows, rows_err := make([][]Cell, size)
+	if rows_err != .None {
+		delete(buffer)
+		panic("failed to alloc board rows")
 	}
+
+	for row in 0 ..< size {
+		start := row * size
+		rows[row] = buffer[start:start+size]
+	}
+
+	return Board{
+		cells = rows,
+		size = size,
+	}
+}
+
+get_cell :: proc(b: Board, p: Position) -> Cell {
+	return b.cells[p[0]][p[1]]
 }
 
 Square :: struct {
@@ -52,7 +68,7 @@ square_offset :: proc(s: Square, offset: f32) -> Square {
 	return Square{corner = s.corner + off_vec, side_len = s.side_len + offset}
 }
 
-draw_cell :: proc(p: Position) {
+draw_cell :: proc(c: Cell, p: Position) {
 	// CONSTS
 	cell_size :: 50.0
 	border_thickness :: 5.0
@@ -66,21 +82,29 @@ draw_cell :: proc(p: Position) {
 	rl.DrawRectangleLinesEx(square_to_rec(border_square), border_thickness, border_color)
 }
 
+draw_board :: proc(b: Board) {
+	for row in 0..<b.size {
+		for column in 0..<b.size {
+			position := Position{row, column}
+			cell := get_cell(b, position)
+			draw_cell(cell, position)
+		}
+	}
+}
+
 main :: proc() {
 	board_size :: 30
 
 	rl.InitWindow(1280, 720, "nonogramination")
+
+	board := new_board(15)
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
 		defer rl.EndDrawing()
 		rl.ClearBackground({160, 200, 255, 255})
 
-		for row in 0 ..< board_size {
-			for column in 0 ..< board_size {
-				draw_cell(Position{row, column})
-			}
-		}
+		draw_board(board)
 	}
 
 	rl.CloseWindow()
