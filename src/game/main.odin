@@ -8,20 +8,19 @@ Position :: [2]u32
 // 2D vector.
 Vec2 :: rl.Vector2
 
-
 main :: proc() {
-	board_size :: 30
+	BOARD_SIZE :: 15
 
 	rl.InitWindow(1280, 720, "nonogramination")
 
-	board := new_board_randomized(15)
+	board := new_board_randomized(BOARD_SIZE)
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
-		defer rl.EndDrawing()
 		rl.ClearBackground({160, 200, 255, 255})
 
 		draw_board(board)
+		rl.EndDrawing()
 	}
 
 	rl.CloseWindow()

@@ -2,7 +2,7 @@ package game
 
 import "core:math/rand"
 
-CellState :: enum u8 {
+Cell_State :: enum u8 {
 	Wall,
 	Filled,
 	Crossed,
@@ -10,7 +10,7 @@ CellState :: enum u8 {
 }
 
 Cell :: struct {
-	state:           CellState, // Active state of the cell.
+	state:           Cell_State, // Active state of the cell.
 	solution_filled: bool, // Does the solution have this as `Filled`?
 }
 
@@ -19,8 +19,8 @@ Board :: struct {
 	size:  u32, // Size of board.
 }
 
-get_cell :: proc(b: Board, p: Position) -> Cell {
-	return b.cells[p[0]][p[1]]
+get_cell :: proc(board: Board, position: Position) -> Cell {
+	return board.cells[position[0]][position[1]]
 }
 
 new_board :: proc(size: u32) -> Board {
@@ -49,7 +49,7 @@ new_board_randomized :: proc(size: u32) -> Board {
 	for &row in board.cells {
 		for &cell in row {
 			// randomized cell state
-			cell.state = rand.choice_enum(CellState)
+			cell.state = rand.choice_enum(Cell_State)
 			// random toggle between true and false
 			cell.solution_filled = (rand.uint32_max(2) != 0)
 		}
