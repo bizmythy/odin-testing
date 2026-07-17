@@ -24,18 +24,35 @@ square_offset :: proc(square: Square, offset: f32) -> Square {
 }
 
 draw_cell :: proc(cell: Cell, position: Position) {
+	// Consts
 	CELL_SIZE :: 50.0
 	BORDER_THICKNESS :: 5.0
 	BORDER_COLOR :: rl.Color{0, 0, 255, 255}
+	FILLED_COLOR :: rl.Color{155, 155, 155, 255}
 
+	// Draw Border
 	corner := Vec2{cast(f32)position[0] * CELL_SIZE, cast(f32)position[1] * CELL_SIZE}
-	square := Square {
+	cell_square := Square {
 		corner   = corner,
 		side_len = CELL_SIZE,
 	}
-
-	border_square := square_offset(square, BORDER_THICKNESS)
+	border_square := square_offset(cell_square, BORDER_THICKNESS)
 	rl.DrawRectangleLinesEx(square_to_rectangle(border_square), BORDER_THICKNESS, BORDER_COLOR)
+
+	// Draw inside cell based on state
+	switch cell.state {
+	case .Wall:
+		// Fill with wall color
+		rl.DrawRectangleRec(square_to_rectangle(cell_square), BORDER_COLOR)
+	case .Filled:
+		// Mostly fill with filled color
+		filled_square := square_offset(cell_square, -1 * BORDER_THICKNESS)
+		rl.DrawRectangleRec(square_to_rectangle(filled_square), FILLED_COLOR)
+	case .Crossed:
+		// TODO: Draw cross
+		return
+	case .Empty: // Do nothing, is empty
+	}
 }
 
 draw_board :: proc(board: Board) {
