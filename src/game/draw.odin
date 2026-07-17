@@ -20,7 +20,7 @@ square_offset :: proc(square: Square, offset: f32) -> Square {
 	assert((offset * -2) < square.side_len, "negative offset too large for given Square")
 
 	offset_vector := Vec2{offset, offset}
-	return Square{corner = square.corner + offset_vector, side_len = square.side_len + offset}
+	return Square{corner = square.corner - offset_vector, side_len = square.side_len + 2 * offset}
 }
 
 draw_cell :: proc(cell: Cell, position: Position) {
@@ -36,7 +36,7 @@ draw_cell :: proc(cell: Cell, position: Position) {
 		corner   = corner,
 		side_len = CELL_SIZE,
 	}
-	border_square := square_offset(cell_square, BORDER_THICKNESS)
+	border_square := square_offset(cell_square, BORDER_THICKNESS / 2) // Center each border on the cell boundary
 	rl.DrawRectangleLinesEx(square_to_rectangle(border_square), BORDER_THICKNESS, BORDER_COLOR)
 
 	// Draw inside cell based on state
@@ -46,7 +46,7 @@ draw_cell :: proc(cell: Cell, position: Position) {
 		rl.DrawRectangleRec(square_to_rectangle(cell_square), BORDER_COLOR)
 	case .Filled:
 		// Mostly fill with filled color
-		filled_square := square_offset(cell_square, -1 * BORDER_THICKNESS)
+		filled_square := square_offset(cell_square, -BORDER_THICKNESS)
 		rl.DrawRectangleRec(square_to_rectangle(filled_square), FILLED_COLOR)
 	case .Crossed:
 		// TODO: Draw cross
@@ -56,11 +56,12 @@ draw_cell :: proc(cell: Cell, position: Position) {
 }
 
 draw_board :: proc(board: Board) {
+	OFFSET :: Position{1, 1}
 	for row in 0 ..< board.size {
 		for column in 0 ..< board.size {
 			position := Position{row, column}
 			cell := get_cell(board, position)
-			draw_cell(cell, position)
+			draw_cell(cell, position + OFFSET)
 		}
 	}
 }
