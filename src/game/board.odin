@@ -25,6 +25,14 @@ get_cell :: proc(board: Board, position: Position) -> ^Cell {
 	return &board.cells[position[0]][position[1]]
 }
 
+get_position :: proc(board: Board, location: Vec2) -> Maybe(Position) {
+	board_location := location - board.corner
+
+	unvalidated_position := board_location / board.cell_size
+	if 
+
+}
+
 new_board :: proc(count: u32, corner: Vec2, cell_size: f32) -> Board {
 	buffer, err := make([]Cell, count * count)
 	if err != .None {
