@@ -41,19 +41,21 @@ square_corners :: proc(square: Square) -> (points: Square_Corners) {
 	return
 }
 
-draw_cell :: proc(cell: Cell, position: Position) {
+draw_cell :: proc(board: Board, position: Position) {
 	// Consts
-	CELL_SIZE :: 50.0
 	BORDER_THICKNESS :: 5.0
 	CROSS_THICKNESS :: 8.0
 	BORDER_COLOR :: rl.Color{0, 0, 255, 255}
 	MARKING_COLOR :: rl.Color{155, 155, 155, 255}
 
+	// Get cell
+	cell := get_cell(board, position)
+
 	// Draw Border
-	corner := Vec2{cast(f32)position[0] * CELL_SIZE, cast(f32)position[1] * CELL_SIZE}
+	corner := Vec2{cast(f32)position[0] * board.cell_size, cast(f32)position[1] * board.cell_size}
 	cell_square := Square {
 		corner   = corner,
-		side_len = CELL_SIZE,
+		side_len = board.cell_size,
 	}
 	border_square := square_offset(cell_square, BORDER_THICKNESS / 2) // Center each border on the cell boundary
 	rl.DrawRectangleLinesEx(square_to_rectangle(border_square), BORDER_THICKNESS, BORDER_COLOR)
@@ -82,8 +84,7 @@ draw_board :: proc(board: Board) {
 	for row in 0 ..< board.size {
 		for column in 0 ..< board.size {
 			position := Position{row, column}
-			cell := get_cell(board, position)
-			draw_cell(cell, position + OFFSET)
+			draw_cell(board, position + OFFSET)
 		}
 	}
 }
