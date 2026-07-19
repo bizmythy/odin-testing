@@ -52,7 +52,7 @@ draw_cell :: proc(board: Board, position: Position) {
 	cell := get_cell(board, position)
 
 	// Draw Border
-	corner := Vec2{cast(f32)position[0] * board.cell_size, cast(f32)position[1] * board.cell_size}
+	corner := board.corner + Vec2{cast(f32)position[0], cast(f32)position[1]} * board.cell_size
 	cell_square := Square {
 		corner   = corner,
 		side_len = board.cell_size,
@@ -80,12 +80,11 @@ draw_cell :: proc(board: Board, position: Position) {
 }
 
 draw_board :: proc(board: Board) {
-	OFFSET :: Position{1, 1}
 	board_size := size(board)
 	for row in 0 ..< board_size {
 		for column in 0 ..< board_size {
-			position := Position{row, column}
-			draw_cell(board, position + OFFSET)
+			position := Position{column, row}
+			draw_cell(board, position)
 		}
 	}
 }

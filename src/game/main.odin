@@ -3,10 +3,7 @@ package game
 import rl "vendor:raylib"
 import "core:log"
 
-// Location on grid, row then column.
 Position :: [2]u32
-
-// 2D vector.
 Vec2 :: rl.Vector2
 
 main :: proc() {
@@ -30,7 +27,7 @@ main :: proc() {
 			log.info("hot cell:", new_hot_cell)
 		}
 		hot_cell = new_hot_cell
-		
+
 		rl.EndDrawing()
 	}
 

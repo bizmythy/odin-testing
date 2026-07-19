@@ -19,10 +19,5 @@ get_hot_cell :: proc(board: Board) -> Maybe(Position) {
 		return nil
 	}
 
-	// Round down to uint position
-	return Position{
-		cast(u32)position_approx[0],
-		cast(u32)position_approx[1],
-	}
+	return Position{cast(u32)position_approx[0], cast(u32)position_approx[1]}
 }
-

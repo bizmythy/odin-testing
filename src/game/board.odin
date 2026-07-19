@@ -35,7 +35,7 @@ dimensions :: proc(board: Board) -> Square {
 }
 
 get_cell :: proc(board: Board, position: Position) -> ^Cell {
-	return &board.cells[position[0]][position[1]]
+	return &board.cells[position[1]][position[0]]
 }
 
 new_board :: proc(count: u32, corner: Vec2, cell_size: f32) -> Board {
