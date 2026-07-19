@@ -81,8 +81,9 @@ draw_cell :: proc(board: Board, position: Position) {
 
 draw_board :: proc(board: Board) {
 	OFFSET :: Position{1, 1}
-	for row in 0 ..< board.size {
-		for column in 0 ..< board.size {
+	board_size := size(board)
+	for row in 0 ..< board_size {
+		for column in 0 ..< board_size {
 			position := Position{row, column}
 			draw_cell(board, position + OFFSET)
 		}
