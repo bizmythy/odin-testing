@@ -47,15 +47,12 @@ square_corners :: proc(square: Square) -> (points: Square_Corners) {
 
 position_square :: proc(board: Board, position: Position) -> Square {
 	corner := board.corner + Vec2{cast(f32)position[0], cast(f32)position[1]} * board.cell_size
-	return Square {
-		corner   = corner,
-		side_len = board.cell_size,
-	}
+	return Square{corner = corner, side_len = board.cell_size}
 }
 
 border_square :: proc(square: Square) -> Square {
 	// Center each border on the boundary
-	return square_offset(square, BORDER_THICKNESS / 2) 
+	return square_offset(square, BORDER_THICKNESS / 2)
 }
 
 draw_cell :: proc(board: Board, position: Position) {
@@ -106,56 +103,37 @@ draw_board :: proc(board: Board) {
 
 draw_hot_cell_indicators :: proc(board: Board, hot_position: Position) {
 	HOT_COLOR :: Color{255, 255, 0, 255}
-	
+
 	hot_border := border_square(position_square(board, hot_position))
-	hot_corners := square_corners(hot_border)
 	dims := dimensions(board)
 
 	// vertical lines
 	{
 		// x coords of the two lines
-		x_left, x_right := hot_corners.top_left[0], hot_corners.top_right[0]
-		
+		x_left := hot_border.corner[0]
+		x_right := x_left + hot_border.side_len
+
 		y_start := dims.corner[1]
 		y_end := y_start + dims.side_len
 
 		// left line
-		rl.DrawLineEx(
-			Vec2{x_left, y_start},
-			Vec2{x_left, y_end},
-			BORDER_THICKNESS,
-			HOT_COLOR,
-		)
+		rl.DrawLineEx(Vec2{x_left, y_start}, Vec2{x_left, y_end}, BORDER_THICKNESS, HOT_COLOR)
 		// right line
-		rl.DrawLineEx(
-			Vec2{x_right, y_start},
-			Vec2{x_right, y_end},
-			BORDER_THICKNESS,
-			HOT_COLOR,
-		)
+		rl.DrawLineEx(Vec2{x_right, y_start}, Vec2{x_right, y_end}, BORDER_THICKNESS, HOT_COLOR)
 	}
 
 	// horizontal lines
 	{
 		// y coords of the two lines
-		y_top, y_bottom := hot_corners.top_left[1], hot_corners.bottom_left[1]
-		
+		y_top := hot_border.corner[1]
+		y_bottom := y_top + hot_border.side_len
+
 		x_start := dims.corner[0]
 		x_end := x_start + dims.side_len
 
 		// top line
-		rl.DrawLineEx(
-			Vec2{x_start, y_top},
-			Vec2{x_end, y_top},
-			BORDER_THICKNESS,
-			HOT_COLOR,
-		)
+		rl.DrawLineEx(Vec2{x_start, y_top}, Vec2{x_end, y_top}, BORDER_THICKNESS, HOT_COLOR)
 		// bottom line
-		rl.DrawLineEx(
-			Vec2{x_start, y_bottom},
-			Vec2{x_end, y_bottom},
-			BORDER_THICKNESS,
-			HOT_COLOR,
-		)
+		rl.DrawLineEx(Vec2{x_start, y_bottom}, Vec2{x_end, y_bottom}, BORDER_THICKNESS, HOT_COLOR)
 	}
 }
