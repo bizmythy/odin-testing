@@ -19,19 +19,47 @@ Board :: struct {
 	cells:     [][]Cell, // Cells, by row then column.
 }
 
+// Get cell count side length of Board
 size :: proc(board: Board) -> u32 {
 	rows := len(board.cells)
 	assert(rows == len(board.cells[0]), "rows and columns not even for Board, not supported")
 	return cast(u32)rows
 }
 
+// Get Square defining dimensions of overall Board
 dimensions :: proc(board: Board) -> Square {
 	side_len := board.cell_size * cast(f32)size(board)
 	return Square{corner = board.corner, side_len = side_len}
 }
 
+// Get cell at specific position
 get_cell :: proc(board: Board, position: Position) -> ^Cell {
+	board_size := size(board)
+	assert(position[0] < board_size, "Position X value out of range")
+	assert(position[1] < board_size, "Position Y value out of range")
 	return &board.cells[position[1]][position[0]]
+}
+
+// Get a copy of the cells for a certain column index.
+// The caller owns the returned slice and must delete it.
+column :: proc(board: Board, column_index: u32) -> []Cell {
+	board_size := size(board)
+	assert(column_index < board_size, "Column index out of range")
+
+	cells, err := make([]Cell, board_size)
+	if err != .None {
+		panic("failed to alloc column")
+	}
+	for row_index in 0 ..< board_size {
+		cells[row_index] = board.cells[row_index][column_index]
+	}
+	return cells
+}
+
+// Get the cells for a certain row index.
+row :: proc(board: Board, row_index: u32) -> []Cell {
+	assert(row_index < size(board), "Row index out of range")
+	return board.cells[row_index]
 }
 
 new_board :: proc(count: u32, corner: Vec2, cell_size: f32) -> Board {

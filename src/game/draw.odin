@@ -86,6 +86,13 @@ draw_cell :: proc(board: Board, position: Position) {
 		rl.DrawLineEx(corners.top_right, corners.bottom_left, CROSS_THICKNESS, MARKING_COLOR)
 	case .Empty: // Do nothing, is empty
 	}
+
+	// DEBUG: draw a circle at the center to show the solution
+	if cell.solution_filled {
+		half_side := cell_square.side_len / 2
+		center_point := cell_square.corner + Vec2{half_side, half_side}
+		rl.DrawCircleV(center_point, 10, BORDER_COLOR)
+	}
 }
 
 draw_board :: proc(board: Board) {
