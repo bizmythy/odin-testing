@@ -104,36 +104,44 @@ draw_board :: proc(board: Board) {
 draw_hot_cell_indicators :: proc(board: Board, hot_position: Position) {
 	HOT_COLOR :: Color{255, 255, 0, 255}
 
-	hot_border := border_square(position_square(board, hot_position))
-	dims := dimensions(board)
+	hot_square := position_square(board, hot_position)
+	board_border := border_square(dimensions(board))
 
 	// vertical lines
 	{
-		// x coords of the two lines
-		x_left := hot_border.corner[0]
-		x_right := x_left + hot_border.side_len
+		x_left := hot_square.corner[0]
+		x_right := x_left + hot_square.side_len
+		x_coords := [2]f32{x_left, x_right}
 
-		y_start := dims.corner[1]
-		y_end := y_start + dims.side_len
-
-		// left line
-		rl.DrawLineEx(Vec2{x_left, y_start}, Vec2{x_left, y_end}, BORDER_THICKNESS, HOT_COLOR)
-		// right line
-		rl.DrawLineEx(Vec2{x_right, y_start}, Vec2{x_right, y_end}, BORDER_THICKNESS, HOT_COLOR)
+		for x in x_coords {
+			rl.DrawRectangleRec(
+				rl.Rectangle {
+					x = x - BORDER_THICKNESS / 2,
+					y = board_border.corner[1],
+					width = BORDER_THICKNESS,
+					height = board_border.side_len,
+				},
+				HOT_COLOR,
+			)
+		}
 	}
 
 	// horizontal lines
 	{
-		// y coords of the two lines
-		y_top := hot_border.corner[1]
-		y_bottom := y_top + hot_border.side_len
+		y_top := hot_square.corner[1]
+		y_bottom := y_top + hot_square.side_len
+		y_coords := [2]f32{y_top, y_bottom}
 
-		x_start := dims.corner[0]
-		x_end := x_start + dims.side_len
-
-		// top line
-		rl.DrawLineEx(Vec2{x_start, y_top}, Vec2{x_end, y_top}, BORDER_THICKNESS, HOT_COLOR)
-		// bottom line
-		rl.DrawLineEx(Vec2{x_start, y_bottom}, Vec2{x_end, y_bottom}, BORDER_THICKNESS, HOT_COLOR)
+		for y in y_coords {
+			rl.DrawRectangleRec(
+				rl.Rectangle {
+					x = board_border.corner[0],
+					y = y - BORDER_THICKNESS / 2,
+					width = board_border.side_len,
+					height = BORDER_THICKNESS,
+				},
+				HOT_COLOR,
+			)
+		}
 	}
 }
