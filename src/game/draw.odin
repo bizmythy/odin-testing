@@ -159,11 +159,36 @@ draw_row_numbers :: proc(board: Board, settings: Number_Settings, row_index: u32
 	}
 }
 
+draw_column_numbers :: proc(board: Board, settings: Number_Settings, column_index: u32) {
+	column_cells := column(board, column_index)
+	defer delete(column_cells)
+	numbers := get_numbers(column_cells)
+
+	// get center top point of box representing column
+	column_center_x := board.cell_size * cast(f32)column_index + (board.cell_size / 2)
+	column_center_top := board.corner + Vec2{column_center_x, 0}
+
+	// shift left corner of number by distance to center
+	number_position := column_center_top - Vec2{settings.size[0] / 2, 0}
+
+	// offset each step by number height
+	number_height := settings.size[1] + NUMBER_SPACING
+	number_offset := Vec2{0, -number_height}
+
+	#reverse for number in numbers {
+		number_position += number_offset
+		draw_number(number, settings, number_position)
+	}
+}
+
 draw_board :: proc(board: Board) {
 	settings := get_number_settings(board)
 	// first_number := new_number(46)
 	// draw_number(first_number, settings, Vec2{30, 5})
 	board_size := size(board)
+	for column in 0 ..< board_size {
+		draw_column_numbers(board, settings, column)
+	}
 	for row in 0 ..< board_size {
 		draw_row_numbers(board, settings, row)
 		for column in 0 ..< board_size {
