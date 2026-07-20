@@ -1,8 +1,10 @@
 package game
 
+import number_font "number_font"
 import rl "vendor:raylib"
 
 BORDER_THICKNESS :: 5.0
+BORDER_COLOR :: Color{0, 0, 255, 255}
 
 Color :: rl.Color
 
@@ -59,7 +61,6 @@ draw_cell :: proc(board: Board, position: Position) {
 	// Consts
 	CROSS_THICKNESS :: 8.0
 	MARKING_COLOR :: Color{155, 155, 155, 255}
-	BORDER_COLOR :: Color{0, 0, 255, 255}
 
 	// Get cell
 	cell := get_cell(board, position)
@@ -95,11 +96,25 @@ draw_cell :: proc(board: Board, position: Position) {
 	}
 }
 
+draw_number :: proc(n: Number, position: Vec2) {
+	codepoints := format_number(n)
+	rl.DrawTextCodepoints(
+		number_font.FONT,
+		&codepoints[0],
+		len(codepoints),
+		position,
+		30, // TODO: determine based on board size etc.
+		5, // TODO: check what this does
+		BORDER_COLOR,
+	)
+}
+
 draw_row_numbers :: proc(board: Board, row_index: u32) {
 
 }
 
 draw_board :: proc(board: Board) {
+	draw_number(new_number(46), Vec2{30, 5})
 	board_size := size(board)
 	for row in 0 ..< board_size {
 		for column in 0 ..< board_size {

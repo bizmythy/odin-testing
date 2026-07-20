@@ -10,11 +10,11 @@ new_number :: proc(n: u32) -> Number {
 	return cast(Number)min(n, LARGEST_NUMBER)
 }
 
-format_number :: proc(n: Number) -> [2]u8 {
+format_number :: proc(n: Number) -> [2]rune {
 	assert(n < LARGEST_NUMBER, "Number will exceed maximum displayable number")
-	ones_digit : u8 = '0' + cast(u8)(n % 10)
-	tens_digit : u8 = '0' + cast(u8)(n / 10)
-	return [2]u8{tens_digit, ones_digit}
+	tens_digit := cast(rune)('0' + (n / 10))
+	ones_digit := cast(rune)('0' + (n % 10))
+	return [2]rune{tens_digit, ones_digit}
 }
 
 // Maximum number count permitted

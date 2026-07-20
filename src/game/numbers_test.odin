@@ -57,6 +57,6 @@ get_numbers_all_filled :: proc(t: ^testing.T) {
 
 @(test)
 format_number_two_digits :: proc(t: ^testing.T) {
-	expected := [2]u8{'5', '3'}
+	expected := [2]rune{'5', '3'}
 	testing.expect_value(t, format_number(new_number(53)), expected)
 }

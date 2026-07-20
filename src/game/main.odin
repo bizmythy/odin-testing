@@ -1,6 +1,7 @@
 package game
 
 import "core:log"
+import number_font "number_font"
 import rl "vendor:raylib"
 
 Position :: [2]u32
@@ -22,6 +23,10 @@ main :: proc() {
 	context.logger = log.create_console_logger()
 
 	raylib_start()
+	defer rl.CloseWindow()
+
+	number_font.load()
+	defer number_font.unload()
 
 	board := new_board_randomized(SETTINGS)
 
@@ -60,5 +65,4 @@ main :: proc() {
 		rl.EndDrawing()
 	}
 
-	rl.CloseWindow()
 }
