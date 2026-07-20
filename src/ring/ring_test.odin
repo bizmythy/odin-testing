@@ -86,6 +86,29 @@ get_ptr_updates_wrapped_entry :: proc(t: ^testing.T) {
 }
 
 @(test)
+truncate_removes_newest_wrapped_entries :: proc(t: ^testing.T) {
+	buffer: Ring_Buffer(int)
+	err := init(&buffer, 3)
+	if !testing.expect_value(t, err, nil) {
+		return
+	}
+	defer destroy(&buffer)
+
+	push(&buffer, 1)
+	push(&buffer, 2)
+	push(&buffer, 3)
+	push(&buffer, 4)
+	truncate(&buffer, 1)
+
+	testing.expect_value(t, len(buffer), 1)
+	testing.expect_value(t, get(buffer, 0), 2)
+
+	push(&buffer, 5)
+	testing.expect_value(t, get(buffer, 0), 2)
+	testing.expect_value(t, get(buffer, 1), 5)
+}
+
+@(test)
 clear_reuses_capacity :: proc(t: ^testing.T) {
 	buffer: Ring_Buffer(int)
 	err := init(&buffer, 2)

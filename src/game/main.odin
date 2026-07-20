@@ -47,6 +47,8 @@ main :: proc() {
 			log.debug("hot cell:", new_hot_cell)
 		}
 		hot_cell = new_hot_cell
+		handle_undo_redo(&board)
+		handle_mouse(&board, hot_cell)
 
 		// Draw
 		rl.BeginDrawing()
@@ -56,7 +58,6 @@ main :: proc() {
 
 		rl.EndDrawing()
 
-		handle_mouse(board, hot_cell)
 		screenshot.run()
 	}
 

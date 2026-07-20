@@ -1,5 +1,6 @@
 package game
 
+import ring "../ring"
 import rl "vendor:raylib"
 
 get_mouse_pos :: proc() -> Vec2 {
@@ -32,12 +33,17 @@ get_hot_cell :: proc(board: Board, global_coord: Vec2) -> HotPosition {
 	return Position{cast(u32)position_approx[0], cast(u32)position_approx[1]}
 }
 
-handle_mouse :: proc(board: Board, hot_cell: HotPosition) {
+handle_mouse :: proc(board: ^Board, hot_cell: HotPosition) {
 	hot, ok := hot_cell.?
 	if !ok {return}
 
-	cell := get_cell(board, hot)
-	if rl.IsMouseButtonPressed(.LEFT) {
+	left_pressed := rl.IsMouseButtonPressed(.LEFT)
+	right_pressed := rl.IsMouseButtonPressed(.RIGHT)
+	if !left_pressed && !right_pressed {return}
+
+	new_state := clone_board_state(active_state(board^))
+	cell := &new_state.cells[hot[1]][hot[0]]
+	if left_pressed {
 		// Empty if filled already, otherwise fill
 		switch cell.state {
 		case .Filled:
@@ -48,7 +54,7 @@ handle_mouse :: proc(board: Board, hot_cell: HotPosition) {
 			cell.state = .Filled
 		}
 	}
-	if rl.IsMouseButtonPressed(.RIGHT) {
+	if right_pressed {
 		// Empty if crossed already, otherwise cross
 		switch cell.state {
 		case .Filled:
@@ -57,6 +63,19 @@ handle_mouse :: proc(board: Board, hot_cell: HotPosition) {
 			cell.state = .Empty
 		case .Empty:
 			cell.state = .Crossed
+		}
+	}
+	push_board_state(board, new_state)
+}
+
+handle_undo_redo :: proc(board: ^Board) {
+	if rl.IsKeyPressed(.Z) {
+		if board.active_state_index > 0 {
+			board.active_state_index -= 1
+		}
+	} else if rl.IsKeyPressed(.Y) {
+		if board.active_state_index + 1 < ring.len(board.state_queue) {
+			board.active_state_index += 1
 		}
 	}
 }

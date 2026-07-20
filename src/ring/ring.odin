@@ -85,11 +85,21 @@ push :: proc(buffer: ^$R/Ring_Buffer($T), value: T) -> (evicted: T, did_evict: b
 	return
 }
 
+// truncate removes entries from the newest end until new_length remains.
+// Removed values are zeroed but are not otherwise destroyed.
+truncate :: proc(buffer: ^$R/Ring_Buffer($T), new_length: int) {
+	assert(new_length >= 0 && new_length <= buffer.count, "Invalid ring buffer length")
+	for index := new_length; index < buffer.count; index += 1 {
+		physical_index := (buffer.start + index) % builtin.len(buffer.data)
+		buffer.data[physical_index] = {}
+	}
+	buffer.count = new_length
+	if new_length == 0 {
+		buffer.start = 0
+	}
+}
+
 // clear removes all entries while retaining the fixed backing allocation.
 clear :: proc(buffer: ^$R/Ring_Buffer($T)) {
-	for &item in buffer.data {
-		item = {}
-	}
-	buffer.start = 0
-	buffer.count = 0
+	truncate(buffer, 0)
 }

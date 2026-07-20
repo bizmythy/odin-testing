@@ -3,36 +3,11 @@ package game
 import ring "../ring"
 import "core:math/rand"
 
-Cell_State :: enum u8 {
-	Filled,
-	Crossed,
-	Empty,
-}
-
-Cell :: struct {
-	state:           Cell_State, // Active state of the cell.
-	solution_filled: bool, // Does the solution have this as `Filled`?
-}
-
-Board_State :: struct {
-	cells: [][]Cell, // Cells, by row then column.
-}
-
 Board :: struct {
 	state_queue:        ring.Ring_Buffer(Board_State),
 	active_state_index: int,
 	corner:             Vec2, // Top-left coordinate of board.
 	cell_size:          f32, // Size of one side of one cell.
-}
-
-active_state :: proc(board: Board) -> ^Board_State {
-	assert(ring.len(board.state_queue) > 0, "Board has no states")
-	assert(board.active_state_index >= 0, "Active board state index out of range")
-	assert(
-		board.active_state_index < ring.len(board.state_queue),
-		"Active board state index out of range",
-	)
-	return ring.get_ptr(board.state_queue, board.active_state_index)
 }
 
 // Get cell count side length of Board
@@ -123,11 +98,7 @@ new_board :: proc(s: Board_Settings) -> Board {
 
 destroy_board :: proc(board: ^Board) {
 	for index in 0 ..< ring.len(board.state_queue) {
-		state := ring.get_ptr(board.state_queue, index)
-		if len(state.cells) > 0 {
-			delete(state.cells[0])
-		}
-		delete(state.cells)
+		destroy_board_state(ring.get_ptr(board.state_queue, index))
 	}
 	ring.destroy(&board.state_queue)
 	board^ = {}
