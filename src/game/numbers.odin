@@ -16,9 +16,14 @@ format_number :: proc(n: Number) -> Number_Codepoints {
 	assert(n <= LARGEST_NUMBER, "Number will exceed maximum displayable number")
 	codepoints: Number_Codepoints
 	// tens place
-	codepoints[1] = cast(rune)('0' + (n / 10))
+	codepoints[0] = cast(rune)('0' + (n / 10))
 	// ones place
-	codepoints[0] = cast(rune)('0' + (n % 10))
+	codepoints[1] = cast(rune)('0' + (n % 10))
+
+	// Don't print leading '0'
+	if codepoints[0] == '0' {
+		codepoints[0] = ' '
+	}
 	return codepoints
 }
 

@@ -6,7 +6,7 @@ import rl "vendor:raylib"
 FONT_DATA :: #load("../../../assets/fonts/jetbrains-mono/JetBrainsMono-Bold.ttf")
 
 BASE_SIZE :: 1200
-CODEPOINTS := [10]rune{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
+CODEPOINTS := [11]rune{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' '}
 FONT: rl.Font
 
 load :: proc() {
