@@ -96,27 +96,76 @@ draw_cell :: proc(board: Board, position: Position) {
 	}
 }
 
-draw_number :: proc(n: Number, position: Vec2) {
+Number_Settings :: struct {
+	font_size: f32, // Font size px
+	spacing:   f32, // Spacing between digits
+	size:      Vec2, // Measured size of two digit number
+}
+
+get_number_settings :: proc(board: Board) -> (settings: Number_Settings) {
+	FONT_SIZE_RATIO :: 0.6
+	FONT_SPACING_RATIO :: 0.1
+
+	settings.font_size = board.cell_size * FONT_SIZE_RATIO
+	settings.spacing = board.cell_size * FONT_SPACING_RATIO
+
+	// Use test number, monospace has same size
+	codepoints := format_number(new_number(88))
+	// Measure and store the size all numbers are expected to be
+	settings.size = rl.MeasureTextCodepoints(
+		number_font.FONT,
+		cast([^]i32)&codepoints[0],
+		len(codepoints),
+		settings.font_size,
+		settings.spacing,
+	)
+
+	return
+}
+
+draw_number :: proc(n: Number, settings: Number_Settings, position: Vec2) {
 	codepoints := format_number(n)
 	rl.DrawTextCodepoints(
 		number_font.FONT,
 		&codepoints[0],
 		len(codepoints),
 		position,
-		30, // TODO: determine based on board size etc.
-		5, // TODO: check what this does
+		settings.font_size,
+		settings.spacing,
 		BORDER_COLOR,
 	)
 }
 
-draw_row_numbers :: proc(board: Board, row_index: u32) {
+NUMBER_SPACING :: 5.0
 
+draw_row_numbers :: proc(board: Board, settings: Number_Settings, row_index: u32) {
+	row_cells := row(board, row_index)
+	numbers := get_numbers(row_cells)
+
+	// get center left point of box representing row
+	row_center_y := board.cell_size * cast(f32)row_index + (board.cell_size / 2)
+	row_center_left := board.corner + Vec2{0, row_center_y}
+
+	// shift up corner of number by distance to center
+	number_position := row_center_left - Vec2{0, settings.size[1] / 2}
+
+	// offset each step by number width
+	number_width := settings.size[0] + NUMBER_SPACING
+	number_offset := Vec2{-number_width, 0}
+
+	#reverse for number in numbers {
+		number_position += number_offset
+		draw_number(number, settings, number_position)
+	}
 }
 
 draw_board :: proc(board: Board) {
-	draw_number(new_number(46), Vec2{30, 5})
+	settings := get_number_settings(board)
+	// first_number := new_number(46)
+	// draw_number(first_number, settings, Vec2{30, 5})
 	board_size := size(board)
 	for row in 0 ..< board_size {
+		draw_row_numbers(board, settings, row)
 		for column in 0 ..< board_size {
 			position := Position{column, row}
 			draw_cell(board, position)

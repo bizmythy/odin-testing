@@ -4,7 +4,9 @@ import "core:log"
 import number_font "number_font"
 import rl "vendor:raylib"
 
+// Position on board cells. Column then row.
 Position :: [2]u32
+
 Vec2 :: rl.Vector2
 
 // Configure raylib window for the application
@@ -16,7 +18,7 @@ raylib_start :: proc() {
 main :: proc() {
 	SETTINGS :: Board_Settings {
 		count     = 10,
-		corner    = Vec2{50, 50},
+		corner    = Vec2{100, 100},
 		cell_size = 50,
 	}
 

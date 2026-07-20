@@ -10,11 +10,16 @@ new_number :: proc(n: u32) -> Number {
 	return cast(Number)min(n, LARGEST_NUMBER)
 }
 
-format_number :: proc(n: Number) -> [2]rune {
-	assert(n < LARGEST_NUMBER, "Number will exceed maximum displayable number")
-	tens_digit := cast(rune)('0' + (n / 10))
-	ones_digit := cast(rune)('0' + (n % 10))
-	return [2]rune{tens_digit, ones_digit}
+Number_Codepoints :: [2]rune
+
+format_number :: proc(n: Number) -> Number_Codepoints {
+	assert(n <= LARGEST_NUMBER, "Number will exceed maximum displayable number")
+	codepoints: Number_Codepoints
+	// tens place
+	codepoints[1] = cast(rune)('0' + (n / 10))
+	// ones place
+	codepoints[0] = cast(rune)('0' + (n % 10))
+	return codepoints
 }
 
 // Maximum number count permitted
