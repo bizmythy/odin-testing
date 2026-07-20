@@ -43,19 +43,15 @@ square_corners :: proc(square: Square) -> (points: Square_Corners) {
 	return
 }
 
-draw_cell :: proc(board: Board, position: Position, hot_cell: HotCell) {
+draw_cell :: proc(board: Board, position: Position) {
 	// Consts
 	BORDER_THICKNESS :: 5.0
 	CROSS_THICKNESS :: 8.0
 	MARKING_COLOR :: Color{155, 155, 155, 255}
+	BORDER_COLOR :: Color{0, 0, 255, 255}
 
 	// Get cell
 	cell := get_cell(board, position)
-
-	border_color := Color{0, 0, 255, 255}
-	if hot, ok := hot_cell.?; ok && hot == position {
-		border_color = Color{255, 255, 0, 255}
-	}
 
 	// Draw Border
 	corner := board.corner + Vec2{cast(f32)position[0], cast(f32)position[1]} * board.cell_size
@@ -64,13 +60,13 @@ draw_cell :: proc(board: Board, position: Position, hot_cell: HotCell) {
 		side_len = board.cell_size,
 	}
 	border_square := square_offset(cell_square, BORDER_THICKNESS / 2) // Center each border on the cell boundary
-	rl.DrawRectangleLinesEx(square_to_rectangle(border_square), BORDER_THICKNESS, border_color)
+	rl.DrawRectangleLinesEx(square_to_rectangle(border_square), BORDER_THICKNESS, BORDER_COLOR)
 
 	// Draw inside cell based on state
 	switch cell.state {
 	case .Wall:
 		// Fill with wall color
-		rl.DrawRectangleRec(square_to_rectangle(cell_square), border_color)
+		rl.DrawRectangleRec(square_to_rectangle(cell_square), BORDER_COLOR)
 	case .Filled:
 		// Mostly fill with filled color
 		filled_square := square_offset(cell_square, -BORDER_THICKNESS)
@@ -85,12 +81,12 @@ draw_cell :: proc(board: Board, position: Position, hot_cell: HotCell) {
 	}
 }
 
-draw_board :: proc(board: Board, hot_cell: HotCell) {
+draw_board :: proc(board: Board) {
 	board_size := size(board)
 	for row in 0 ..< board_size {
 		for column in 0 ..< board_size {
 			position := Position{column, row}
-			draw_cell(board, position, hot_cell)
+			draw_cell(board, position)
 		}
 	}
 }

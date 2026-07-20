@@ -36,7 +36,7 @@ main :: proc() {
 		rl.BeginDrawing()
 		rl.ClearBackground({160, 200, 255, 255})
 
-		draw_board(board, hot_cell)
+		draw_board(board)
 
 		rl.EndDrawing()
 	}
