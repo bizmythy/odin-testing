@@ -13,16 +13,32 @@ Cell :: struct {
 	solution_filled: bool, // Does the solution have this as `Filled`?
 }
 
+Board_State :: struct {
+	cells: [][]Cell, // Cells, by row then column.
+}
+
 Board :: struct {
-	corner:    Vec2, // Top-left coordinate of board.
-	cell_size: f32, // Size of one side of one cell.
-	cells:     [][]Cell, // Cells, by row then column.
+	state_queue:        [dynamic]Board_State,
+	active_state_index: int,
+	corner:             Vec2, // Top-left coordinate of board.
+	cell_size:          f32, // Size of one side of one cell.
+}
+
+active_state :: proc(board: Board) -> ^Board_State {
+	assert(len(board.state_queue) > 0, "Board has no states")
+	assert(board.active_state_index >= 0, "Active board state index out of range")
+	assert(
+		board.active_state_index < len(board.state_queue),
+		"Active board state index out of range",
+	)
+	return &board.state_queue[board.active_state_index]
 }
 
 // Get cell count side length of Board
 size :: proc(board: Board) -> u32 {
-	rows := len(board.cells)
-	assert(rows == len(board.cells[0]), "rows and columns not even for Board, not supported")
+	state := active_state(board)
+	rows := len(state.cells)
+	assert(rows == len(state.cells[0]), "rows and columns not even for Board, not supported")
 	return cast(u32)rows
 }
 
@@ -37,7 +53,7 @@ get_cell :: proc(board: Board, position: Position) -> ^Cell {
 	board_size := size(board)
 	assert(position[0] < board_size, "Position X value out of range")
 	assert(position[1] < board_size, "Position Y value out of range")
-	return &board.cells[position[1]][position[0]]
+	return &active_state(board).cells[position[1]][position[0]]
 }
 
 // Get a copy of the cells for a certain column index.
@@ -50,8 +66,9 @@ column :: proc(board: Board, column_index: u32) -> []Cell {
 	if err != .None {
 		panic("failed to alloc column")
 	}
+	state := active_state(board)
 	for row_index in 0 ..< board_size {
-		cells[row_index] = board.cells[row_index][column_index]
+		cells[row_index] = state.cells[row_index][column_index]
 	}
 	return cells
 }
@@ -59,7 +76,7 @@ column :: proc(board: Board, column_index: u32) -> []Cell {
 // Get the cells for a certain row index.
 row :: proc(board: Board, row_index: u32) -> []Cell {
 	assert(row_index < size(board), "Row index out of range")
-	return board.cells[row_index]
+	return active_state(board).cells[row_index]
 }
 
 Board_Settings :: struct {
@@ -85,13 +102,29 @@ new_board :: proc(s: Board_Settings) -> Board {
 		rows[row] = buffer[start:start + s.count]
 	}
 
-	return Board{corner = s.corner, cell_size = s.cell_size, cells = rows}
+	state_queue, queue_err := make([dynamic]Board_State, 1)
+	if queue_err != .None {
+		delete(rows)
+		delete(buffer)
+		panic("failed to alloc board state queue")
+	}
+	state_queue[0] = Board_State {
+		cells = rows,
+	}
+
+	return Board {
+		state_queue = state_queue,
+		active_state_index = 0,
+		corner = s.corner,
+		cell_size = s.cell_size,
+	}
 }
 
 new_board_randomized :: proc(s: Board_Settings) -> Board {
 	board := new_board(s)
 
-	for &row in board.cells {
+	state := active_state(board)
+	for &row in state.cells {
 		for &cell in row {
 			// randomized cell state
 			cell.state = rand.choice_enum(Cell_State)
