@@ -13,9 +13,11 @@ run :: proc() {
 		return
 	}
 
-	if err := os.make_directory_all(SCREENSHOT_DIRECTORY); err != nil {
-		log.errorf("Could not create screenshot directory: %v", err)
-		return
+	if !os.exists(SCREENSHOT_DIRECTORY) {
+		if err := os.make_directory_all(SCREENSHOT_DIRECTORY); err != nil {
+			log.errorf("Could not create screenshot directory: %v", err)
+			return
+		}
 	}
 
 	rl.TakeScreenshot(SCREENSHOT_PATH)

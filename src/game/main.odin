@@ -1,5 +1,6 @@
 package game
 
+import logger "../logger"
 import screenshot "../screenshot"
 import "core:log"
 import number_font "number_font"
@@ -23,7 +24,8 @@ main :: proc() {
 		cell_size = 50,
 	}
 
-	context.logger = log.create_console_logger()
+	context.logger = logger.init()
+	defer logger.destroy()
 
 	raylib_start()
 	defer rl.CloseWindow()

@@ -5,5 +5,6 @@
 /game
 *.o
 
-# In-game screenshots
+# Runtime output
 /screenshots/
+/logs/
