@@ -5,6 +5,7 @@ import rl "vendor:raylib"
 
 BORDER_THICKNESS :: 5.0
 BORDER_COLOR :: Color{0, 0, 255, 255}
+HOT_COLOR :: Color{255, 255, 0, 255}
 
 Color :: rl.Color
 
@@ -52,11 +53,6 @@ position_square :: proc(board: Board, position: Position) -> Square {
 	return Square{corner = corner, side_len = board.cell_size}
 }
 
-border_square :: proc(square: Square) -> Square {
-	// Center each border on the boundary
-	return square_offset(square, BORDER_THICKNESS / 2)
-}
-
 draw_cell :: proc(board: Board, position: Position) {
 	// Consts
 	CROSS_THICKNESS :: 8.0
@@ -64,14 +60,7 @@ draw_cell :: proc(board: Board, position: Position) {
 
 	// Get cell
 	cell := get_cell(board, position)
-
-	// Draw Border
 	cell_square := position_square(board, position)
-	rl.DrawRectangleLinesEx(
-		square_to_rectangle(border_square(cell_square)),
-		BORDER_THICKNESS,
-		BORDER_COLOR,
-	)
 
 	// Draw inside cell based on state
 	switch cell.state {
@@ -123,7 +112,7 @@ get_number_settings :: proc(board: Board) -> (settings: Number_Settings) {
 	return
 }
 
-draw_number :: proc(n: Number, settings: Number_Settings, position: Vec2) {
+draw_number :: proc(n: Number, settings: Number_Settings, position: Vec2, color: Color) {
 	codepoints := format_number(n)
 	rl.DrawTextCodepoints(
 		number_font.FONT,
@@ -132,13 +121,13 @@ draw_number :: proc(n: Number, settings: Number_Settings, position: Vec2) {
 		position,
 		settings.font_size,
 		settings.spacing,
-		BORDER_COLOR,
+		color,
 	)
 }
 
 NUMBER_SPACING :: 5.0
 
-draw_row_numbers :: proc(board: Board, settings: Number_Settings, row_index: u32) {
+draw_row_numbers :: proc(board: Board, settings: Number_Settings, row_index: u32, color: Color) {
 	row_cells := row(board, row_index)
 	numbers := get_numbers(row_cells)
 
@@ -155,11 +144,11 @@ draw_row_numbers :: proc(board: Board, settings: Number_Settings, row_index: u32
 
 	#reverse for number in numbers {
 		number_position += number_offset
-		draw_number(number, settings, number_position)
+		draw_number(number, settings, number_position, color)
 	}
 }
 
-draw_column_numbers :: proc(board: Board, settings: Number_Settings, column_index: u32) {
+draw_column_numbers :: proc(board: Board, settings: Number_Settings, column_index: u32, color: Color) {
 	column_cells := column(board, column_index)
 	defer delete(column_cells)
 	numbers := get_numbers(column_cells)
@@ -177,68 +166,113 @@ draw_column_numbers :: proc(board: Board, settings: Number_Settings, column_inde
 
 	#reverse for number in numbers {
 		number_position += number_offset
-		draw_number(number, settings, number_position)
+		draw_number(number, settings, number_position, color)
 	}
 }
 
-draw_board :: proc(board: Board) {
-	settings := get_number_settings(board)
-	// first_number := new_number(46)
-	// draw_number(first_number, settings, Vec2{30, 5})
+get_number_area_size :: proc(board: Board, settings: Number_Settings) -> Vec2 {
+	max_row_numbers := 0
+	max_column_numbers := 0
 	board_size := size(board)
-	for column in 0 ..< board_size {
-		draw_column_numbers(board, settings, column)
+
+	for row_index in 0 ..< board_size {
+		numbers := get_numbers(row(board, row_index))
+		max_row_numbers = max(max_row_numbers, len(numbers))
 	}
-	for row in 0 ..< board_size {
-		draw_row_numbers(board, settings, row)
-		for column in 0 ..< board_size {
-			position := Position{column, row}
+	for column_index in 0 ..< board_size {
+		column_cells := column(board, column_index)
+		numbers := get_numbers(column_cells)
+		max_column_numbers = max(max_column_numbers, len(numbers))
+		delete(column_cells)
+	}
+
+	return Vec2 {
+		cast(f32)max_row_numbers * (settings.size[0] + NUMBER_SPACING),
+		cast(f32)max_column_numbers * (settings.size[1] + NUMBER_SPACING),
+	}
+}
+
+is_hot_row :: proc(hot_position: HotPosition, row_index: u32) -> bool {
+	if hot, ok := hot_position.?; ok {
+		return row_index == hot[1]
+	}
+	return false
+}
+
+is_hot_column :: proc(hot_position: HotPosition, column_index: u32) -> bool {
+	if hot, ok := hot_position.?; ok {
+		return column_index == hot[0]
+	}
+	return false
+}
+
+is_hot_row_border :: proc(hot_position: HotPosition, border_index: u32) -> bool {
+	if hot, ok := hot_position.?; ok {
+		return border_index == hot[1] || border_index == hot[1] + 1
+	}
+	return false
+}
+
+is_hot_column_border :: proc(hot_position: HotPosition, border_index: u32) -> bool {
+	if hot, ok := hot_position.?; ok {
+		return border_index == hot[0] || border_index == hot[0] + 1
+	}
+	return false
+}
+
+draw_board_borders :: proc(board: Board, number_area: Vec2, hot_position: HotPosition) {
+	board_side_len := board.cell_size * cast(f32)size(board)
+	board_size := size(board)
+
+	for column_border in 0 ..= board_size {
+		x := board.corner[0] + board.cell_size * cast(f32)column_border
+		color := HOT_COLOR if is_hot_column_border(hot_position, column_border) else BORDER_COLOR
+		rl.DrawRectangleRec(
+			rl.Rectangle {
+				x = x - BORDER_THICKNESS / 2,
+				y = board.corner[1] - number_area[1] - BORDER_THICKNESS / 2,
+				width = BORDER_THICKNESS,
+				height = board_side_len + number_area[1] + BORDER_THICKNESS,
+			},
+			color,
+		)
+	}
+
+	for row_border in 0 ..= board_size {
+		y := board.corner[1] + board.cell_size * cast(f32)row_border
+		color := HOT_COLOR if is_hot_row_border(hot_position, row_border) else BORDER_COLOR
+		rl.DrawRectangleRec(
+			rl.Rectangle {
+				x = board.corner[0] - number_area[0] - BORDER_THICKNESS / 2,
+				y = y - BORDER_THICKNESS / 2,
+				width = board_side_len + number_area[0] + BORDER_THICKNESS,
+				height = BORDER_THICKNESS,
+			},
+			color,
+		)
+	}
+}
+
+draw_board :: proc(board: Board, hot_position: HotPosition) {
+	settings := get_number_settings(board)
+	number_area := get_number_area_size(board, settings)
+	board_size := size(board)
+
+	for row_index in 0 ..< board_size {
+		for column_index in 0 ..< board_size {
+			position := Position{column_index, row_index}
 			draw_cell(board, position)
 		}
 	}
-}
 
-draw_hot_cell_indicators :: proc(board: Board, hot_position: Position) {
-	HOT_COLOR :: Color{255, 255, 0, 255}
-
-	hot_square := position_square(board, hot_position)
-	board_border := border_square(dimensions(board))
-
-	// vertical lines
-	{
-		x_left := hot_square.corner[0]
-		x_right := x_left + hot_square.side_len
-		x_coords := [2]f32{x_left, x_right}
-
-		for x in x_coords {
-			rl.DrawRectangleRec(
-				rl.Rectangle {
-					x = x - BORDER_THICKNESS / 2,
-					y = board_border.corner[1],
-					width = BORDER_THICKNESS,
-					height = board_border.side_len,
-				},
-				HOT_COLOR,
-			)
-		}
+	for column_index in 0 ..< board_size {
+		color := HOT_COLOR if is_hot_column(hot_position, column_index) else BORDER_COLOR
+		draw_column_numbers(board, settings, column_index, color)
+	}
+	for row_index in 0 ..< board_size {
+		color := HOT_COLOR if is_hot_row(hot_position, row_index) else BORDER_COLOR
+		draw_row_numbers(board, settings, row_index, color)
 	}
 
-	// horizontal lines
-	{
-		y_top := hot_square.corner[1]
-		y_bottom := y_top + hot_square.side_len
-		y_coords := [2]f32{y_top, y_bottom}
-
-		for y in y_coords {
-			rl.DrawRectangleRec(
-				rl.Rectangle {
-					x = board_border.corner[0],
-					y = y - BORDER_THICKNESS / 2,
-					width = board_border.side_len,
-					height = BORDER_THICKNESS,
-				},
-				HOT_COLOR,
-			)
-		}
-	}
+	draw_board_borders(board, number_area, hot_position)
 }

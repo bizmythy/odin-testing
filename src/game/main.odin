@@ -61,11 +61,7 @@ main :: proc() {
 		rl.BeginDrawing()
 		rl.ClearBackground({160, 200, 255, 255})
 
-		draw_board(board)
-
-		if hot, ok := hot_cell.?; ok {
-			draw_hot_cell_indicators(board, hot)
-		}
+		draw_board(board, hot_cell)
 
 		rl.EndDrawing()
 
