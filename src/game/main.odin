@@ -43,17 +43,6 @@ main :: proc() {
 		new_hot_cell := get_hot_cell(board, mouse_pos)
 		if new_hot_cell != hot_cell {
 			log.debug("hot cell:", new_hot_cell)
-			// Log numbers for the newly highlighted row and column.
-			if hot, ok := new_hot_cell.?; ok {
-				hot_row := row(board, hot[1])
-				hot_col := column(board, hot[0])
-				row_nums := get_numbers(hot_row)
-				col_nums := get_numbers(hot_col)
-
-				log.info("hot row nums:", row_nums)
-				log.info("hot col nums:", col_nums)
-				delete(hot_col)
-			}
 		}
 		hot_cell = new_hot_cell
 
@@ -65,6 +54,7 @@ main :: proc() {
 
 		rl.EndDrawing()
 
+		handle_mouse(board, hot_cell)
 		screenshot.run()
 	}
 

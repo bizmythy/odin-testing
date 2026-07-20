@@ -31,3 +31,32 @@ get_hot_cell :: proc(board: Board, global_coord: Vec2) -> HotPosition {
 
 	return Position{cast(u32)position_approx[0], cast(u32)position_approx[1]}
 }
+
+handle_mouse :: proc(board: Board, hot_cell: HotPosition) {
+	hot, ok := hot_cell.?
+	if !ok { return }
+
+	cell := get_cell(board, hot)
+	if rl.IsMouseButtonPressed(.LEFT) {
+		// Empty if filled already, otherwise fill
+		switch cell.state {
+		case .Filled:
+			cell.state = .Empty
+		case .Crossed:
+			cell.state = .Filled
+		case .Empty:
+			cell.state = .Filled
+		}
+	}
+	if rl.IsMouseButtonPressed(.RIGHT) {
+		// Empty if crossed already, otherwise cross
+		switch cell.state {
+		case .Filled:
+			cell.state = .Crossed
+		case .Crossed:
+			cell.state = .Empty
+		case .Empty:
+			cell.state = .Crossed
+		}
+	}
+}
