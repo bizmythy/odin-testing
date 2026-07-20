@@ -13,13 +13,17 @@ raylib_start :: proc() {
 }
 
 main :: proc() {
-	BOARD_CELL_COUNT :: 10
-
+	SETTINGS :: Board_Settings{
+		count = 10,
+		corner = Vec2{50,50},
+		cell_size = 50,
+	}
+	
 	context.logger = log.create_console_logger()
 
 	raylib_start()
 
-	board := new_board_randomized(BOARD_CELL_COUNT)
+	board := new_board_randomized(SETTINGS)
 
 	hot_cell: HotPosition = nil
 

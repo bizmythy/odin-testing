@@ -62,31 +62,34 @@ row :: proc(board: Board, row_index: u32) -> []Cell {
 	return board.cells[row_index]
 }
 
-new_board :: proc(count: u32, corner: Vec2, cell_size: f32) -> Board {
-	buffer, err := make([]Cell, count * count)
+Board_Settings :: struct {
+	count: u32,
+	corner: Vec2,
+	cell_size: f32,
+}
+
+new_board :: proc(s: Board_Settings) -> Board {
+	buffer, err := make([]Cell, s.count * s.count)
 	if err != .None {
 		panic("failed to alloc board")
 	}
 
-	rows, rows_err := make([][]Cell, count)
+	rows, rows_err := make([][]Cell, s.count)
 	if rows_err != .None {
 		delete(buffer)
 		panic("failed to alloc board rows")
 	}
 
-	for row in 0 ..< count {
-		start := row * count
-		rows[row] = buffer[start:start + count]
+	for row in 0 ..< s.count {
+		start := row * s.count
+		rows[row] = buffer[start:start + s.count]
 	}
 
-	return Board{corner = corner, cell_size = cell_size, cells = rows}
+	return Board{corner = s.corner, cell_size = s.cell_size, cells = rows}
 }
 
-new_board_randomized :: proc(count: u32) -> Board {
-	CORNER :: Vec2{30, 30}
-	CELL_SIZE :: 50.0
-
-	board := new_board(count, CORNER, CELL_SIZE)
+new_board_randomized :: proc(s: Board_Settings) -> Board {
+	board := new_board(s)
 
 	for &row in board.cells {
 		for &cell in row {
