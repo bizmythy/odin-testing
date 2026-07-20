@@ -21,7 +21,7 @@ main :: proc() {
 
 	board := new_board_randomized(BOARD_CELL_COUNT)
 
-	hot_cell: HotCell = nil
+	hot_cell: HotPosition = nil
 
 	for !rl.WindowShouldClose() {
 		// Input
@@ -37,6 +37,10 @@ main :: proc() {
 		rl.ClearBackground({160, 200, 255, 255})
 
 		draw_board(board)
+
+		if hot, ok := hot_cell.?; ok {
+			draw_hot_cell_indicators(board, hot)
+		}
 
 		rl.EndDrawing()
 	}

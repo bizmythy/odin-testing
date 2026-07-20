@@ -2,6 +2,8 @@ package game
 
 import rl "vendor:raylib"
 
+BORDER_THICKNESS :: 5.0
+
 Color :: rl.Color
 
 Square :: struct {
@@ -43,9 +45,21 @@ square_corners :: proc(square: Square) -> (points: Square_Corners) {
 	return
 }
 
+position_square :: proc(board: Board, position: Position) -> Square {
+	corner := board.corner + Vec2{cast(f32)position[0], cast(f32)position[1]} * board.cell_size
+	return Square {
+		corner   = corner,
+		side_len = board.cell_size,
+	}
+}
+
+border_square :: proc(square: Square) -> Square {
+	// Center each border on the boundary
+	return square_offset(square, BORDER_THICKNESS / 2) 
+}
+
 draw_cell :: proc(board: Board, position: Position) {
 	// Consts
-	BORDER_THICKNESS :: 5.0
 	CROSS_THICKNESS :: 8.0
 	MARKING_COLOR :: Color{155, 155, 155, 255}
 	BORDER_COLOR :: Color{0, 0, 255, 255}
@@ -54,13 +68,12 @@ draw_cell :: proc(board: Board, position: Position) {
 	cell := get_cell(board, position)
 
 	// Draw Border
-	corner := board.corner + Vec2{cast(f32)position[0], cast(f32)position[1]} * board.cell_size
-	cell_square := Square {
-		corner   = corner,
-		side_len = board.cell_size,
-	}
-	border_square := square_offset(cell_square, BORDER_THICKNESS / 2) // Center each border on the cell boundary
-	rl.DrawRectangleLinesEx(square_to_rectangle(border_square), BORDER_THICKNESS, BORDER_COLOR)
+	cell_square := position_square(board, position)
+	rl.DrawRectangleLinesEx(
+		square_to_rectangle(border_square(cell_square)),
+		BORDER_THICKNESS,
+		BORDER_COLOR,
+	)
 
 	// Draw inside cell based on state
 	switch cell.state {
@@ -88,5 +101,61 @@ draw_board :: proc(board: Board) {
 			position := Position{column, row}
 			draw_cell(board, position)
 		}
+	}
+}
+
+draw_hot_cell_indicators :: proc(board: Board, hot_position: Position) {
+	HOT_COLOR :: Color{255, 255, 0, 255}
+	
+	hot_border := border_square(position_square(board, hot_position))
+	hot_corners := square_corners(hot_border)
+	dims := dimensions(board)
+
+	// vertical lines
+	{
+		// x coords of the two lines
+		x_left, x_right := hot_corners.top_left[0], hot_corners.top_right[0]
+		
+		y_start := dims.corner[1]
+		y_end := y_start + dims.side_len
+
+		// left line
+		rl.DrawLineEx(
+			Vec2{x_left, y_start},
+			Vec2{x_left, y_end},
+			BORDER_THICKNESS,
+			HOT_COLOR,
+		)
+		// right line
+		rl.DrawLineEx(
+			Vec2{x_right, y_start},
+			Vec2{x_right, y_end},
+			BORDER_THICKNESS,
+			HOT_COLOR,
+		)
+	}
+
+	// horizontal lines
+	{
+		// y coords of the two lines
+		y_top, y_bottom := hot_corners.top_left[1], hot_corners.bottom_left[1]
+		
+		x_start := dims.corner[0]
+		x_end := x_start + dims.side_len
+
+		// top line
+		rl.DrawLineEx(
+			Vec2{x_start, y_top},
+			Vec2{x_end, y_top},
+			BORDER_THICKNESS,
+			HOT_COLOR,
+		)
+		// bottom line
+		rl.DrawLineEx(
+			Vec2{x_start, y_bottom},
+			Vec2{x_end, y_bottom},
+			BORDER_THICKNESS,
+			HOT_COLOR,
+		)
 	}
 }

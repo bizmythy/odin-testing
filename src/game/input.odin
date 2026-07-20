@@ -12,9 +12,9 @@ get_mouse_pos :: proc() -> Vec2 {
 	return mouse
 }
 
-HotCell :: Maybe(Position)
+HotPosition :: Maybe(Position)
 
-get_hot_cell :: proc(board: Board, global_coord: Vec2) -> HotCell {
+get_hot_cell :: proc(board: Board, global_coord: Vec2) -> HotPosition {
 	mouse_rel := global_coord - board.corner
 	position_approx := mouse_rel / board.cell_size
 
