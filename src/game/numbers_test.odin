@@ -19,8 +19,8 @@ expect_numbers :: proc(t: ^testing.T, filled: []bool, expected: []u32) {
 	if !testing.expect_value(t, len(actual), len(expected)) {
 		return
 	}
-	for number, index in expected {
-		testing.expect_value(t, actual[index], number)
+	for val, index in expected {
+		testing.expect_value(t, actual[index], new_number(val))
 	}
 }
 
@@ -53,4 +53,10 @@ get_numbers_all_filled :: proc(t: ^testing.T) {
 	filled := [4]bool{true, true, true, true}
 	expected := [1]u32{4}
 	expect_numbers(t, filled[:], expected[:])
+}
+
+@(test)
+format_number_two_digits :: proc(t: ^testing.T) {
+	expected := [2]u8{'5', '3'}
+	testing.expect_value(t, format_number(new_number(53)), expected)
 }

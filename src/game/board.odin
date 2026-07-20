@@ -63,8 +63,8 @@ row :: proc(board: Board, row_index: u32) -> []Cell {
 }
 
 Board_Settings :: struct {
-	count: u32,
-	corner: Vec2,
+	count:     u32,
+	corner:    Vec2,
 	cell_size: f32,
 }
 

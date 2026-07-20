@@ -13,12 +13,12 @@ raylib_start :: proc() {
 }
 
 main :: proc() {
-	SETTINGS :: Board_Settings{
-		count = 10,
-		corner = Vec2{50,50},
+	SETTINGS :: Board_Settings {
+		count     = 10,
+		corner    = Vec2{50, 50},
 		cell_size = 50,
 	}
-	
+
 	context.logger = log.create_console_logger()
 
 	raylib_start()

@@ -95,6 +95,10 @@ draw_cell :: proc(board: Board, position: Position) {
 	}
 }
 
+draw_row_numbers :: proc(board: Board, row_index: u32) {
+
+}
+
 draw_board :: proc(board: Board) {
 	board_size := size(board)
 	for row in 0 ..< board_size {
