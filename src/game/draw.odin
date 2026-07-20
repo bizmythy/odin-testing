@@ -74,9 +74,6 @@ draw_cell :: proc(board: Board, position: Position) {
 
 	// Draw inside cell based on state
 	switch cell.state {
-	case .Wall:
-		// Fill with wall color
-		rl.DrawRectangleRec(square_to_rectangle(cell_square), BORDER_COLOR)
 	case .Filled:
 		// Mostly fill with filled color
 		filled_square := square_offset(cell_square, -BORDER_THICKNESS)

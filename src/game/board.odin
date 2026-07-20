@@ -3,7 +3,6 @@ package game
 import "core:math/rand"
 
 Cell_State :: enum u8 {
-	Wall,
 	Filled,
 	Crossed,
 	Empty,
