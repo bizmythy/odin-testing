@@ -2,10 +2,18 @@ package game
 
 import rl "vendor:raylib"
 
-get_hot_cell :: proc(board: Board) -> Maybe(Position) {
-	mouse_coord := rl.GetMousePosition()
+get_mouse_pos :: proc() -> Vec2 {
+	rl.SetMouseScale(1, 1)
+	mouse := rl.GetMousePosition()
 
-	mouse_rel := mouse_coord - board.corner
+	// DEBUG: draw circle at mouse pos
+	rl.DrawCircleV(mouse, 5.0, rl.Color{0, 0, 0, 255})
+
+	return mouse
+}
+
+get_hot_cell :: proc(board: Board, global_coord: Vec2) -> Maybe(Position) {
+	mouse_rel := global_coord - board.corner
 	position_approx := mouse_rel / board.cell_size
 
 	// Check within bounds

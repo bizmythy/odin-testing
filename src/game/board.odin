@@ -15,7 +15,7 @@ Cell :: struct {
 }
 
 Board :: struct {
-	corner:  Vec2, // Top-left coordinate of board.
+	corner:    Vec2, // Top-left coordinate of board.
 	cell_size: f32, // Size of one side of one cell.
 	cells:     [][]Cell, // Cells, by row then column.
 }
@@ -28,10 +28,7 @@ size :: proc(board: Board) -> u32 {
 
 dimensions :: proc(board: Board) -> Square {
 	side_len := board.cell_size * cast(f32)size(board)
-	return Square{
-		corner = board.corner,
-		side_len = side_len,
-	}
+	return Square{corner = board.corner, side_len = side_len}
 }
 
 get_cell :: proc(board: Board, position: Position) -> ^Cell {
