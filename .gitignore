@@ -4,3 +4,6 @@
 # Odin build artifacts
 /game
 *.o
+
+# In-game screenshots
+/screenshots/

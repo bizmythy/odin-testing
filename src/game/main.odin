@@ -1,5 +1,6 @@
 package game
 
+import screenshot "../screenshot"
 import "core:log"
 import number_font "number_font"
 import rl "vendor:raylib"
@@ -65,6 +66,8 @@ main :: proc() {
 		}
 
 		rl.EndDrawing()
+
+		screenshot.run()
 	}
 
 }
