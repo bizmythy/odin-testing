@@ -19,9 +19,10 @@ raylib_start :: proc() {
 
 main :: proc() {
 	SETTINGS :: Board_Settings {
-		count     = 10,
-		corner    = Vec2{100, 100},
-		cell_size = 50,
+		count            = 10,
+		history_capacity = 100,
+		corner           = Vec2{100, 100},
+		cell_size        = 50,
 	}
 
 	context.logger = logger.init()
@@ -34,6 +35,7 @@ main :: proc() {
 	defer number_font.unload()
 
 	board := new_board_randomized(SETTINGS)
+	defer destroy_board(&board)
 
 	hot_cell: HotPosition = nil
 

@@ -148,7 +148,12 @@ draw_row_numbers :: proc(board: Board, settings: Number_Settings, row_index: u32
 	}
 }
 
-draw_column_numbers :: proc(board: Board, settings: Number_Settings, column_index: u32, color: Color) {
+draw_column_numbers :: proc(
+	board: Board,
+	settings: Number_Settings,
+	column_index: u32,
+	color: Color,
+) {
 	column_cells := column(board, column_index)
 	defer delete(column_cells)
 	numbers := get_numbers(column_cells)

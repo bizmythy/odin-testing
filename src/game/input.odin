@@ -34,7 +34,7 @@ get_hot_cell :: proc(board: Board, global_coord: Vec2) -> HotPosition {
 
 handle_mouse :: proc(board: Board, hot_cell: HotPosition) {
 	hot, ok := hot_cell.?
-	if !ok { return }
+	if !ok {return}
 
 	cell := get_cell(board, hot)
 	if rl.IsMouseButtonPressed(.LEFT) {

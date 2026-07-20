@@ -1,5 +1,6 @@
 package game
 
+import ring "../ring"
 import "core:math/rand"
 
 Cell_State :: enum u8 {
@@ -18,20 +19,20 @@ Board_State :: struct {
 }
 
 Board :: struct {
-	state_queue:        [dynamic]Board_State,
+	state_queue:        ring.Ring_Buffer(Board_State),
 	active_state_index: int,
 	corner:             Vec2, // Top-left coordinate of board.
 	cell_size:          f32, // Size of one side of one cell.
 }
 
 active_state :: proc(board: Board) -> ^Board_State {
-	assert(len(board.state_queue) > 0, "Board has no states")
+	assert(ring.len(board.state_queue) > 0, "Board has no states")
 	assert(board.active_state_index >= 0, "Active board state index out of range")
 	assert(
-		board.active_state_index < len(board.state_queue),
+		board.active_state_index < ring.len(board.state_queue),
 		"Active board state index out of range",
 	)
-	return &board.state_queue[board.active_state_index]
+	return ring.get_ptr(board.state_queue, board.active_state_index)
 }
 
 // Get cell count side length of Board
@@ -80,9 +81,10 @@ row :: proc(board: Board, row_index: u32) -> []Cell {
 }
 
 Board_Settings :: struct {
-	count:     u32,
-	corner:    Vec2,
-	cell_size: f32,
+	count:            u32,
+	history_capacity: int,
+	corner:           Vec2,
+	cell_size:        f32,
 }
 
 new_board :: proc(s: Board_Settings) -> Board {
@@ -102,15 +104,14 @@ new_board :: proc(s: Board_Settings) -> Board {
 		rows[row] = buffer[start:start + s.count]
 	}
 
-	state_queue, queue_err := make([dynamic]Board_State, 1)
+	state_queue: ring.Ring_Buffer(Board_State)
+	queue_err := ring.init(&state_queue, s.history_capacity)
 	if queue_err != .None {
 		delete(rows)
 		delete(buffer)
 		panic("failed to alloc board state queue")
 	}
-	state_queue[0] = Board_State {
-		cells = rows,
-	}
+	ring.push(&state_queue, Board_State{cells = rows})
 
 	return Board {
 		state_queue = state_queue,
@@ -118,6 +119,18 @@ new_board :: proc(s: Board_Settings) -> Board {
 		corner = s.corner,
 		cell_size = s.cell_size,
 	}
+}
+
+destroy_board :: proc(board: ^Board) {
+	for index in 0 ..< ring.len(board.state_queue) {
+		state := ring.get_ptr(board.state_queue, index)
+		if len(state.cells) > 0 {
+			delete(state.cells[0])
+		}
+		delete(state.cells)
+	}
+	ring.destroy(&board.state_queue)
+	board^ = {}
 }
 
 new_board_randomized :: proc(s: Board_Settings) -> Board {
